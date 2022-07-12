@@ -134,7 +134,7 @@ components:
     replicas: 1
     resources:
       requests:
-        cpu: 1
+        cpu: 2
         memory: 4Gi
       limits:
         cpu: 4
@@ -143,16 +143,16 @@ components:
     replicas: 1
     rresources:
       requests:
-        cpu: 1
+        cpu: 2
         memory: 4Gi
       limits:
         cpu: 4
-        memory: 6Gii
+        memory: 6Gi
   indexCoord:
     replicas: 1
     resources:
       requests:
-        cpu: 1
+        cpu: 2
         memory: 4Gi
       limits:
         cpu: 4
@@ -160,12 +160,11 @@ components:
   queryCoord:
     resources:
       requests:
-        cpu: 1
+        cpu: 2
         memory: 4Gi
       limits:
         cpu: 4
         memory: 6Gi
-
   proxy:
     replicas: 3
     resources:
@@ -179,16 +178,16 @@ components:
     replicas: 2
     resources:
       requests:
-        cpu: 6
+        cpu: 12
         memory: 12Gi
       limits:
         cpu: 18
-        memory: 24Gi
-  dateNode:
+        memory: 12Gi
+  dataNode:
     replicas: 2
     resources:
       requests:
-        cpu: 3
+        cpu: 6
         memory: 12Gi
       limits:
         cpu: 12

@@ -123,14 +123,6 @@ func (o *MilvusUpdateOptions) validatePruneAll(prune, all bool, selector string)
 
 func (o *MilvusUpdateOptions) Run(f cmdutil.Factory, cmd *cobra.Command, client *client.Client, args []string) error {
 
-	// namespacedName := types.NamespacedName{
-	// 	Name:      instanceName,
-	// 	Namespace: o.Namespace,
-	// }
-	// if errors.IsNotFound(client.Get(ctx, namespacedName, &v1alpha1.Milvus{})) {
-	// 	return nil, fmt.Errorf("Error: milvuses.milvus.io %s do not exists in namespace: %s", instanceName, o.Namespace)
-	// }
-
 	if len(args) == 0 {
 		cmdutil.CheckErr(o.Complete(f, cmd))
 		if err := o.ApplyOptions.Run(); err != nil {

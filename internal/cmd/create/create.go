@@ -3,13 +3,13 @@ package create
 import (
 	"context"
 	"fmt"
+	"github.com/ghodss/yaml"
 	"github.com/milvus-io/milvus-operator/apis/milvus.io/v1beta1"
 	pkgerr "github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"helm.sh/helm/v3/pkg/strvals"
 	"k8s.io/apimachinery/pkg/api/errors"
-	// metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"github.com/ghodss/yaml"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
@@ -128,16 +128,21 @@ func (o *MilvusCreateOptions) newMilvusInstance(client client.Client, ctx contex
 		Name:      instanceName,
 		Namespace: o.Namespace,
 	}
-	newMilvus := &v1beta1.Milvus{}
 
-	if !errors.IsNotFound(client.Get(ctx, namespacedName, newMilvus)) {
+	if !errors.IsNotFound(client.Get(ctx, namespacedName, &v1beta1.Milvus{})) {
 		return nil, fmt.Errorf("Error: milvuses.milvus.io %s already exists", instanceName)
 	}
 
 	if o.Mode != "cluster" && o.Mode != "" && o.Mode != "standalone" {
 		return nil, fmt.Errorf("Error mode, please specify one of the following modes: 'standalone', 'cluster'")
 	}
-	// var spec v1beta1.MilvusSpec
+
+	newMilvus := &v1beta1.Milvus{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      instanceName,
+			Namespace: o.Namespace,
+		},
+	}
 
 	switch o.Type {
 	case "minimal":
@@ -186,7 +191,6 @@ func (o *MilvusCreateOptions) newMilvusInstance(client client.Client, ctx contex
 		return nil, fmt.Errorf("Error type, please specify one of the following types: 'minimal', 'medium', 'large'")
 	}
 
-	// newMilvus.Spec = spec
 	err := parsingNestedStructure(reflect.ValueOf(&newMilvus.Spec).Elem(), o.ResouceSetting)
 	if err != nil {
 		return nil, err
@@ -223,6 +227,11 @@ func parsingNestedStructure(v reflect.Value, values map[string]interface{}) erro
 	}
 
 	if v.Type().String() == "v1beta1.Values" {
+		// newValues := reflect.ValueOf(values).Convert(v.FieldByName("Data").Type())
+		// fmt.Println("source value: ", v.FieldByName("Data"))
+		// fmt.Println("new value: ", values)
+		// v.FieldByName("Data").Set(newValues)
+		// err := mapOverwirte(v.FieldByName("Data"), values)
 		v.FieldByName("Data").Set(reflect.ValueOf(values).Convert(v.FieldByName("Data").Type()))
 		return err
 	}
@@ -311,6 +320,12 @@ func setValue(subSpec reflect.Value, value interface{}) error {
 	}
 	return err
 }
+
+// func mapOverwirte(v reflect.Value, values map[string]interface{}) error {
+// 	for key, value := range values {
+
+// 	}
+// }
 
 func ifTagInSpec(t reflect.Type, key string) (string, bool) {
 	tagMap := getTagMap(t)

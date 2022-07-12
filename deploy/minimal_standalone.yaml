@@ -1,0 +1,32 @@
+components:
+  resources:
+    requests:
+      cpu: 1
+      memory: 4Gi
+    limits:
+      cpu: 3
+      memory: 12Gi
+dependencies:
+  etcd:
+    inCluster:
+      values:
+        replicaCount: 1
+        resources:
+          requests:
+            cpu: 0.5
+            memory: 1Gi
+          limits:
+            cpu: 1
+            memory: 2Gi
+  storage:
+    inCluster:
+      values:
+        mode: standalone
+        resources:
+          requests:
+            cpu: 0.5
+            memory: 3Gi
+          limits:
+            cpu: 1
+            memory: 6Gi
+config: {}
