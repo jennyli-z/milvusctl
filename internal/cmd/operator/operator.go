@@ -8,14 +8,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func NewOperatorCmd(cfg *action.Configuration,f cmdutil.Factory, ioStreams genericclioptions.IOStreams,client *client.Client) *cobra.Command {
+func NewOperatorCmd(cfg *action.Configuration, f cmdutil.Factory, ioStreams genericclioptions.IOStreams, client *client.Client) *cobra.Command {
 	operatorCmd := &cobra.Command{
-		Use: "operator",
+		Use:   "operator",
 		Short: "command related to The Milvus operator",
-		Run: runHelp,
+		Run:   runHelp,
 	}
-	operatorCmd.AddCommand(NewOperatorInstallCmd(cfg,f,ioStreams,client))
-	operatorCmd.AddCommand(NewOperatorUninstallCmd(cfg,f,ioStreams,client))
+	operatorCmd.AddCommand(NewOperatorInstallCmd(cfg, f, ioStreams, client))
+	operatorCmd.AddCommand(NewOperatorUninstallCmd(cfg, f, ioStreams, client))
 	return operatorCmd
 }
 func runHelp(cmd *cobra.Command, args []string) {

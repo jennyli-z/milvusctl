@@ -10,3 +10,6 @@ fmt: ## Run go fmt against code
 
 vet: ## Run go vet against code
 	go vet ./...
+
+build: fmt vet
+	go build -o milvusctl main.go

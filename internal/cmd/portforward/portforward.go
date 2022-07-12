@@ -73,16 +73,15 @@ var (
 		kubectl port-forward pod/mypod :5000`))
 )
 
-
 const (
 	// Amount of time to wait until at least one pod is running
 	defaultPodPortForwardWaitTimeout = 60 * time.Second
 )
 
-func NewPortForwardCmd(f cmdutil.Factory, streams genericclioptions.IOStreams) * cobra.Command {
+func NewPortForwardCmd(f cmdutil.Factory, streams genericclioptions.IOStreams) *cobra.Command {
 	opts := &PortForwardOptions{
 		PortForwarder: &defaultPortForwarder{
-			IOStreams:streams,
+			IOStreams: streams,
 		},
 	}
 	cmd := &cobra.Command{
