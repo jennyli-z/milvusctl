@@ -7,6 +7,7 @@ package main
 import (
 	"fmt"
 	"github.com/milvus-io/milvus-operator/apis/milvus.io/v1alpha1"
+	"github.com/milvus-io/milvus-operator/apis/milvus.io/v1beta1"
 	"github.com/milvus-io/milvusctl/internal/cmd"
 	"github.com/spf13/cobra"
 	"helm.sh/helm/v3/pkg/action"
@@ -22,6 +23,7 @@ import (
 	"sigs.k8s.io/yaml"
 	"strings"
 )
+
 var (
 	settings = cli.New()
 )
@@ -35,7 +37,7 @@ func debug(format string, v ...interface{}) {
 func main() {
 	cfg := new(action.Configuration)
 	var client client.Client
-	rootCmd := cmd.NewMilvusCmd(cfg,&client)
+	rootCmd := cmd.NewMilvusCmd(cfg, &client)
 
 	cobra.OnInitialize(func() {
 		helmDriver := os.Getenv("HELM_DRIVER")
@@ -97,5 +99,6 @@ func loadClientset() client.Client {
 	client, _ := client.New(cfg, client.Options{})
 	scheme := client.Scheme()
 	v1alpha1.AddToScheme(scheme)
+	v1beta1.AddToScheme(scheme)
 	return client
 }

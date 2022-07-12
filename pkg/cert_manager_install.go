@@ -16,7 +16,7 @@ import (
 )
 
 type InstallOptions struct {
-	Settings *cli.EnvSettings
+	Settings  *cli.EnvSettings
 	Client    *action.Install
 	Cfg       *action.Configuration
 	ValueOpts *values.Options
@@ -25,12 +25,12 @@ type InstallOptions struct {
 	DryRun    bool
 	Wait      bool
 }
+
 const (
 	installCRDsFlagName         = "installCRDs"
 	defaultCertManagerNamespace = "cert-manager"
-	defaultReleaseName = "cert-manager"
+	defaultReleaseName          = "cert-manager"
 )
-
 
 func (o *InstallOptions) RunInstall(ctx context.Context) (*release.Release, error) {
 	//if _,err := o.Cfg.Releases.History(defaultReleaseName); err  == nil {
@@ -63,7 +63,6 @@ func (o *InstallOptions) RunInstall(ctx context.Context) (*release.Release, erro
 	if err != nil {
 		return nil, err
 	}
-
 
 	// Dryrun template generation (used for rendering the CRDs in /templates)
 	o.Client.DryRun = true                  // Do not apply install
@@ -102,14 +101,13 @@ func (o *InstallOptions) RunInstall(ctx context.Context) (*release.Release, erro
 		return nil, err
 	}
 
-	if len(originalCRDs)  == 0 {
+	if len(originalCRDs) == 0 {
 		// Install CRDs
 		if err := helm.CreateCRDs(crds, o.Cfg); err != nil {
 			return nil, err
 		}
 
 	}
-
 
 	// Install chart
 	o.Client.DryRun = false     // Apply DryRun cli flags
@@ -126,7 +124,7 @@ func (o *InstallOptions) RunInstall(ctx context.Context) (*release.Release, erro
 	// the hook will still wait for the installation to succeed.
 	o.Client.DisableHooks = !o.Wait
 	o.Client.Replace = true
-	o.Client.CreateNamespace=true
+	o.Client.CreateNamespace = true
 	//o.client.Namespace = defaultCertManagerNamespace
 	chartValues[installCRDsFlagName] = false // Do not render CRDs, as this might cause problems when uninstalling using helm
 
@@ -141,4 +139,3 @@ func checkIfInstallable(ch *chart.Chart) error {
 	}
 	return fmt.Errorf("%s charts are not installable", ch.Metadata.Type)
 }
-

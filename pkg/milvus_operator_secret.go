@@ -11,7 +11,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func CreateMilvusOperatorSecert(ctx context.Context,data map[string]string,client client.Client) error {
+func CreateMilvusOperatorSecert(ctx context.Context, data map[string]string, client client.Client) error {
 	log.Printf("Creating the milvus-operator secert")
 	namespacedName := types.NamespacedName{
 		Name:      "milvusctl-milvus-operator",
@@ -19,37 +19,37 @@ func CreateMilvusOperatorSecert(ctx context.Context,data map[string]string,clien
 	}
 	configmap := &corev1.ConfigMap{}
 	fmt.Println(client)
-	err := client.Get(ctx,namespacedName,configmap)
+	err := client.Get(ctx, namespacedName, configmap)
 	if errors.IsNotFound(err) {
 		configmap = &corev1.ConfigMap{
-			ObjectMeta:metav1.ObjectMeta{
-				Name: "milvusctl-milvus-operator",
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "milvusctl-milvus-operator",
 				Namespace: "milvus-operator",
 			},
 		}
 		configmap.Data = data
-		return client.Create(ctx,configmap)
-	}else if err != nil{
+		return client.Create(ctx, configmap)
+	} else if err != nil {
 		return err
 	}
 	return nil
 }
-func DeleteMilvusOperatorSecert(ctx context.Context,client client.Client) error {
+func DeleteMilvusOperatorSecert(ctx context.Context, client client.Client) error {
 	log.Printf("Deleting the milvus-operator secert")
 
 	namespacedName := types.NamespacedName{
 		Name:      "milvusctl-milvus-operator",
 		Namespace: "milvus-operator",
 	}
-	var configMap = new (corev1.ConfigMap)
+	var configMap = new(corev1.ConfigMap)
 	if err := client.Get(ctx, namespacedName, configMap); err != nil {
 		return err
 	} else {
-		return client.Delete(ctx,configMap)
+		return client.Delete(ctx, configMap)
 	}
-	return nil
+	// return nil
 }
-func FetchDataFromSecret(ctx context.Context,client client.Client) (map[string]string,error) {
+func FetchDataFromSecret(ctx context.Context, client client.Client) (map[string]string, error) {
 	log.Printf("Fetching the milvus-operator secert data")
 	namespacedName := types.NamespacedName{
 		Name:      "milvusctl-milvus-operator",
@@ -61,9 +61,9 @@ func FetchDataFromSecret(ctx context.Context,client client.Client) (map[string]s
 		fmt.Println(client)
 		fmt.Println(namespacedName)
 		fmt.Println("can't find the configmap")
-		return nil,err
+		return nil, err
 	} else {
-		return configMap.Data,err
+		return configMap.Data, err
 	}
-	return nil,nil
+	// return nil, nil
 }

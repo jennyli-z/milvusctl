@@ -33,33 +33,31 @@ type operatorInstallArgs struct {
 
 	//kubectl create options
 	createOptions kubectlcreate.CreateOptions
-
 }
 
-
-func NewOperatorInstallCmd(cfg *action.Configuration,f cmdutil.Factory, ioStreams genericclioptions.IOStreams,client *client.Client) *cobra.Command {
+func NewOperatorInstallCmd(cfg *action.Configuration, f cmdutil.Factory, ioStreams genericclioptions.IOStreams, client *client.Client) *cobra.Command {
 	o := kubectlcreate.NewCreateOptions(ioStreams)
 	co := api.NewOptions(ioStreams)
-	co.Wait = 3*time.Minute
-	co.Interval = 5 *time.Second
+	co.Wait = 3 * time.Minute
+	co.Interval = 5 * time.Second
 	co.Verbose = false
-	o.FilenameOptions.Filenames = append(o.FilenameOptions.Filenames,"https://raw.githubusercontent.com/milvus-io/milvus-operator/main/deploy/manifests/deployment.yaml")
+	o.FilenameOptions.Filenames = append(o.FilenameOptions.Filenames, "https://raw.githubusercontent.com/milvus-io/milvus-operator/main/deploy/manifests/deployment.yaml")
 	installCmd := &cobra.Command{
-		Use: "install",
+		Use:   "install",
 		Short: "Install the milvus operator controller in the cluster",
-		Long: "The install subcommand installs the milvus operator controller in the cluster",
+		Long:  "The install subcommand installs the milvus operator controller in the cluster",
 		Run: func(cmd *cobra.Command, args []string) {
-			if cmdutil.IsFilenameSliceEmpty(o.FilenameOptions.Filenames,o.FilenameOptions.Kustomize) {
+			if cmdutil.IsFilenameSliceEmpty(o.FilenameOptions.Filenames, o.FilenameOptions.Kustomize) {
 				ioStreams.ErrOut.Write([]byte("Error: must specify one of -f and -k\\n\\n"))
 			}
 			settings := cli.New()
 			options := &pkg.InstallOptions{
-				Settings:   settings,
-				Cfg:        cfg,
-				Client:     action.NewInstall(cfg),
-				ValueOpts:  &values.Options{},
-				ChartName : "jetstack/cert-manager",
-				DryRun:     false,
+				Settings:  settings,
+				Cfg:       cfg,
+				Client:    action.NewInstall(cfg),
+				ValueOpts: &values.Options{},
+				ChartName: "jetstack/cert-manager",
+				DryRun:    false,
 			}
 			options.Client.Namespace = "cert-manager"
 			options.Client.ReleaseName = "cert-manager"
@@ -67,26 +65,26 @@ func NewOperatorInstallCmd(cfg *action.Configuration,f cmdutil.Factory, ioStream
 			options.Client.GenerateName = false
 			options.Client.CreateNamespace = true
 			options.Client.DryRun = false
-			if _,err := options.RunInstall(context.TODO()); err != nil{
+			if _, err := options.RunInstall(context.TODO()); err != nil {
 				ioStreams.ErrOut.Write([]byte("Error: cert-manager install failed"))
 			}
 			if err := co.Complete(); err != nil {
 				fmt.Println(err)
 			}
 			log.Printf("Installing the cert manager component，please wating----------------")
-			run(context.TODO(),Options(co))
-			cmdutil.CheckErr(o.Complete(f,cmd))
-			cmdutil.CheckErr(o.ValidateArgs(cmd,args))
-			cmdutil.CheckErr(o.RunCreate(f,cmd))
+			run(context.TODO(), Options(co))
+			cmdutil.CheckErr(o.Complete(f, cmd))
+			cmdutil.CheckErr(o.ValidateArgs(cmd, args))
+			cmdutil.CheckErr(o.RunCreate(f, cmd))
 			mp := make(map[string]string)
 			mp["deploy"] = o.FilenameOptions.Filenames[0]
-			pkg.CreateMilvusOperatorSecert(context.TODO(),mp,*client)
+			pkg.CreateMilvusOperatorSecert(context.TODO(), mp, *client)
 		},
 	}
 	co.Factory = factory.New(context.TODO(), installCmd)
 	o.RecordFlags.AddFlags(installCmd)
 	usage := "to use to create the resouce"
-	cmdutil.AddFilenameOptionFlags(installCmd,&o.FilenameOptions,usage)
+	cmdutil.AddFilenameOptionFlags(installCmd, &o.FilenameOptions, usage)
 	cmdutil.AddValidateFlags(installCmd)
 	o.PrintFlags.AddFlags(installCmd)
 	cmdutil.AddApplyAnnotationFlags(installCmd)
@@ -94,8 +92,9 @@ func NewOperatorInstallCmd(cfg *action.Configuration,f cmdutil.Factory, ioStream
 	//cmdutil.AddFieldManagerFlagVar(installCmd,)
 	return installCmd
 }
+
 // Run executes check api command
-func run(ctx context.Context,o Options) {
+func run(ctx context.Context, o Options) {
 	if !o.Verbose {
 		log.SetFlags(0) // Disable prefixing logs with timestamps.
 	}

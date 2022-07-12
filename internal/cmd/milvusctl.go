@@ -10,6 +10,7 @@ import (
 	"github.com/milvus-io/milvusctl/internal/cmd/delete"
 	"github.com/milvus-io/milvusctl/internal/cmd/operator"
 	"github.com/milvus-io/milvusctl/internal/cmd/portforward"
+	"github.com/milvus-io/milvusctl/internal/cmd/update"
 	"github.com/spf13/cobra"
 	"helm.sh/helm/v3/pkg/action"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
@@ -21,15 +22,16 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"syscall"
 )
+
 type MilvusctlOptions struct {
 	PluginHandler PluginHandler
-	Arguments []string
-	ConfigFlags *genericclioptions.ConfigFlags
+	Arguments     []string
+	ConfigFlags   *genericclioptions.ConfigFlags
 	genericclioptions.IOStreams
 }
 
 // rootCmd represents the base command when called without any subcommands
-func NewMilvusCmd(cfg *action.Configuration,client *client.Client) *cobra.Command {
+func NewMilvusCmd(cfg *action.Configuration, client *client.Client) *cobra.Command {
 	o := MilvusctlOptions{
 		PluginHandler: NewDefaultPluginHandler(plugin.ValidPluginFilenamePrefixes),
 		Arguments:     os.Args,
@@ -59,13 +61,13 @@ Find more information at:
 	matchVersionKubeConfigFlags := cmdutil.NewMatchVersionFlags(kubeConfigFlags)
 	matchVersionKubeConfigFlags.AddFlags(flags)
 
-
 	f := cmdutil.NewFactory(matchVersionKubeConfigFlags)
 
-	milvusCmd.AddCommand(operator.NewOperatorCmd(cfg,f,o.IOStreams,client))
-	milvusCmd.AddCommand(create.NewMilvusCreateCmd(f,o.IOStreams,client))
-	milvusCmd.AddCommand(portforward.NewPortForwardCmd(f,o.IOStreams))
-	milvusCmd.AddCommand(delete.NewMilvusDeleteCmd(f,o.IOStreams,client))
+	milvusCmd.AddCommand(operator.NewOperatorCmd(cfg, f, o.IOStreams, client))
+	milvusCmd.AddCommand(create.NewMilvusCreateCmd(f, o.IOStreams, client))
+	milvusCmd.AddCommand(portforward.NewPortForwardCmd(f, o.IOStreams))
+	milvusCmd.AddCommand(delete.NewMilvusDeleteCmd(f, o.IOStreams, client))
+	milvusCmd.AddCommand(update.NewMilvusUpdateCmd(f, o.IOStreams, client))
 	return milvusCmd
 }
 
@@ -129,7 +131,6 @@ func (h *DefaultPluginHandler) Execute(executablePath string, cmdArgs, environme
 	// append executablePath to cmdArgs, as execve will make first argument the "binary name".
 	return syscall.Exec(executablePath, append([]string{executablePath}, cmdArgs...), environment)
 }
-
 
 // NewDefaultPluginHandler instantiates the DefaultPluginHandler with a list of
 // given filename prefixes used to identify valid plugin filenames.

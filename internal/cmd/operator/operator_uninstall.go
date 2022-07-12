@@ -13,41 +13,41 @@ import (
 	"time"
 )
 
-func NewOperatorUninstallCmd(cfg *action.Configuration,f cmdutil.Factory, ioStreams genericclioptions.IOStreams,client *client.Client) *cobra.Command {
+func NewOperatorUninstallCmd(cfg *action.Configuration, f cmdutil.Factory, ioStreams genericclioptions.IOStreams, client *client.Client) *cobra.Command {
 	var deleteCertManager bool
 
 	deletflags := kubectldelete.NewDeleteFlags("containing the operator to delete.")
 	deleteCmd := &cobra.Command{
-		Use: "uninstall",
+		Use:   "uninstall",
 		Short: "Uninstall the milvus operator controller in the cluster",
-		Long: "The uninstall subcommand uninstalls the milvus operator controller in the cluster",
+		Long:  "The uninstall subcommand uninstalls the milvus operator controller in the cluster",
 		Run: func(cmd *cobra.Command, args []string) {
-			o,err := deletflags.ToOptions(nil,ioStreams)
-			 mp,err := pkg.FetchDataFromSecret(context.TODO(),*client);
-			 if err != nil {
+			o, err := deletflags.ToOptions(nil, ioStreams)
+			mp, err := pkg.FetchDataFromSecret(context.TODO(), *client)
+			if err != nil {
 				log.Error(err)
 			}
-			if len(o.FilenameOptions.Filenames) ==0{
-				o.FilenameOptions.Filenames = append(o.FilenameOptions.Filenames,mp["deploy"])
+			if len(o.FilenameOptions.Filenames) == 0 {
+				o.FilenameOptions.Filenames = append(o.FilenameOptions.Filenames, mp["deploy"])
 			}
 			cmdutil.CheckErr(err)
-			cmdutil.CheckErr(o.Complete(f,args,cmd))
+			cmdutil.CheckErr(o.Complete(f, args, cmd))
 			cmdutil.CheckErr(o.Validate())
 			cmdutil.CheckErr(o.RunDelete(f))
 			if deleteCertManager == true {
 				options := &pkg.UnInstallOptions{
-					Cfg: cfg,
+					Cfg:    cfg,
 					Client: action.NewUninstall(cfg),
 				}
 
 				options.RunUninstall(context.TODO())
 			}
-			pkg.DeleteMilvusOperatorSecert(context.TODO(),*client)
+			pkg.DeleteMilvusOperatorSecert(context.TODO(), *client)
 		},
 	}
 	deletflags.AddFlags(deleteCmd)
 	cmdutil.AddDryRunFlag(deleteCmd)
-	deleteCmd.Flags().BoolVar(&deleteCertManager,"delete-cert-manager",false,"delete the cert-manager if it installed")
+	deleteCmd.Flags().BoolVar(&deleteCertManager, "delete-cert-manager", false, "delete the cert-manager if it installed")
 	return deleteCmd
 }
 
