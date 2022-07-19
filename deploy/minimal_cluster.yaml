@@ -134,7 +134,7 @@ components:
     replicas: 1
     resources:
       requests:
-        cpu: 0.5
+        cpu: 1
         memory: 2Gi
       limits:
         cpu: 2
@@ -152,16 +152,16 @@ components:
     replicas: 1
     resources:
       requests:
-        cpu: 2
+        cpu: 4
         memory: 4Gi
       limits:
         cpu: 6
-        memory: 8Gi
-  dateNode:
+        memory: 4Gi
+  dataNode:
     replicas: 1
     resources:
       requests:
-        cpu: 1
+        cpu: 2
         memory: 4Gi
       limits:
         cpu: 4
