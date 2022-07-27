@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/milvus-io/milvusctl/internal/cmd/create"
 	"github.com/milvus-io/milvusctl/internal/cmd/delete"
+	"github.com/milvus-io/milvusctl/internal/cmd/describe"
 	"github.com/milvus-io/milvusctl/internal/cmd/logs"
 	"github.com/milvus-io/milvusctl/internal/cmd/operator"
 	"github.com/milvus-io/milvusctl/internal/cmd/portforward"
@@ -70,6 +71,7 @@ Find more information at:
 	milvusCmd.AddCommand(delete.NewMilvusDeleteCmd(f, o.IOStreams, client))
 	milvusCmd.AddCommand(update.NewMilvusUpdateCmd(f, o.IOStreams, client))
 	milvusCmd.AddCommand(logs.NewMilvusLogsCmd(f, o.IOStreams))
+	milvusCmd.AddCommand(describe.NewMilvusDescribeCmd(f, o.IOStreams, client))
 	return milvusCmd
 }
 
