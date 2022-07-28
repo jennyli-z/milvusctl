@@ -6,10 +6,12 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/milvus-io/milvusctl/internal/cmd/cp"
 	"github.com/milvus-io/milvusctl/internal/cmd/create"
 	"github.com/milvus-io/milvusctl/internal/cmd/delete"
 	"github.com/milvus-io/milvusctl/internal/cmd/describe"
 	ctlexec "github.com/milvus-io/milvusctl/internal/cmd/exec"
+	"github.com/milvus-io/milvusctl/internal/cmd/get"
 	"github.com/milvus-io/milvusctl/internal/cmd/logs"
 	"github.com/milvus-io/milvusctl/internal/cmd/operator"
 	"github.com/milvus-io/milvusctl/internal/cmd/portforward"
@@ -74,6 +76,8 @@ Find more information at:
 	milvusCmd.AddCommand(logs.NewMilvusLogsCmd(f, o.IOStreams))
 	milvusCmd.AddCommand(describe.NewMilvusDescribeCmd(f, o.IOStreams, client))
 	milvusCmd.AddCommand(ctlexec.NewMilvusExecCmd(f, o.IOStreams))
+	milvusCmd.AddCommand(cp.NewMilvusCpCmd(f, o.IOStreams))
+	milvusCmd.AddCommand(get.NewMilvusGetCmd("milvusctl", f, o.IOStreams))
 	return milvusCmd
 }
 
