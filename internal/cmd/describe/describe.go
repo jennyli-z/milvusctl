@@ -101,6 +101,7 @@ func NewMilvusDescribeCmd(f cmdutil.Factory, streams genericclioptions.IOStreams
 
 	usage := "containing the resource to describe"
 	cmdutil.AddFilenameOptionFlags(cmd, o.DescribeOptions.FilenameOptions, usage)
+	// cmd.Flags().StringVarP(&o.DescribeOptions.Namespace, "namespace", "n", o.DescribeOptions.Namespace, "namespace")
 	cmd.Flags().StringVarP(&o.DescribeOptions.Selector, "selector", "l", o.DescribeOptions.Selector, "Selector (label query) to filter on, supports '=', '==', and '!='.(e.g. -l key1=value1,key2=value2)")
 	cmd.Flags().BoolVarP(&o.DescribeOptions.AllNamespaces, "all-namespaces", "A", o.DescribeOptions.AllNamespaces, "If present, list the requested object(s) across all namespaces. Namespace in current context is ignored even if specified with --namespace.")
 	cmd.Flags().BoolVar(&o.DescribeOptions.DescriberSettings.ShowEvents, "show-events", o.DescribeOptions.DescriberSettings.ShowEvents, "If true, display events related to the described object.")
@@ -108,7 +109,7 @@ func NewMilvusDescribeCmd(f cmdutil.Factory, streams genericclioptions.IOStreams
 
 	cmd.Flags().StringVar(&o.Component, "component", o.Component, "specify milvus componenet")
 	cmd.Flags().StringVar(&o.Dependence, "dependence", o.Dependence, "specify milvus dependence")
-	cmd.Flags().StringVarP(&o.Namespace, "namespace", "n", o.Namespace, "use type parameter to choose namespace")
+	// cmd.Flags().StringVarP(&o.Namespace, "namespace", "n", o.Namespace, "use type parameter to choose namespace")
 
 	return cmd
 }
@@ -124,6 +125,8 @@ func (o MilvusDescribeOptions) Run(f cmdutil.Factory, client *client.Client, arg
 	var err error
 	allErrs := []error{}
 	o.InstanceName = args[1]
+	o.Namespace, _, err = f.ToRawKubeConfigLoader().Namespace()
+	// fmt.Println(o.Namespace)
 	err = o.MilvusComponent(f, *client)
 	if err != nil {
 		allErrs = append(allErrs, err)

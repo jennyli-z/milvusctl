@@ -16,6 +16,7 @@ func NewOperatorCmd(cfg *action.Configuration, f cmdutil.Factory, ioStreams gene
 	}
 	operatorCmd.AddCommand(NewOperatorInstallCmd(cfg, f, ioStreams, client))
 	operatorCmd.AddCommand(NewOperatorUninstallCmd(cfg, f, ioStreams, client))
+	operatorCmd.AddCommand(NewOperatorUpgradeCmd(f, ioStreams, client))
 	return operatorCmd
 }
 func runHelp(cmd *cobra.Command, args []string) {
