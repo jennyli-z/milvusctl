@@ -18,7 +18,7 @@ func CreateMilvusOperatorSecert(ctx context.Context, data map[string]string, cli
 		Namespace: "milvus-operator",
 	}
 	configmap := &corev1.ConfigMap{}
-	fmt.Println(client)
+	// fmt.Println(client)
 	err := client.Get(ctx, namespacedName, configmap)
 	if errors.IsNotFound(err) {
 		configmap = &corev1.ConfigMap{
@@ -55,7 +55,7 @@ func FetchDataFromSecret(ctx context.Context, client client.Client) (map[string]
 		Name:      "milvusctl-milvus-operator",
 		Namespace: "milvus-operator",
 	}
-	fmt.Println(client)
+	// fmt.Println(client)
 	var configMap = new(corev1.ConfigMap)
 	if err := client.Get(ctx, namespacedName, configMap); err != nil {
 		fmt.Println(client)

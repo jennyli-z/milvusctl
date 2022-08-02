@@ -36,17 +36,26 @@ type operatorInstallArgs struct {
 }
 
 func NewOperatorInstallCmd(cfg *action.Configuration, f cmdutil.Factory, ioStreams genericclioptions.IOStreams, client *client.Client) *cobra.Command {
+	var operatorVersion string
+	var yamlFile string
 	o := kubectlcreate.NewCreateOptions(ioStreams)
 	co := api.NewOptions(ioStreams)
 	co.Wait = 3 * time.Minute
 	co.Interval = 5 * time.Second
 	co.Verbose = false
-	o.FilenameOptions.Filenames = append(o.FilenameOptions.Filenames, "https://raw.githubusercontent.com/milvus-io/milvus-operator/main/deploy/manifests/deployment.yaml")
+
 	installCmd := &cobra.Command{
 		Use:   "install",
 		Short: "Install the milvus operator controller in the cluster",
 		Long:  "The install subcommand installs the milvus operator controller in the cluster",
 		Run: func(cmd *cobra.Command, args []string) {
+			if operatorVersion != "" {
+				yamlFile = fmt.Sprintf("https://raw.githubusercontent.com/milvus-io/milvus-operator/v%s/deploy/manifests/deployment.yaml", operatorVersion)
+			} else {
+				yamlFile = "https://raw.githubusercontent.com/milvus-io/milvus-operator/main/deploy/manifests/deployment.yaml"
+			}
+
+			o.FilenameOptions.Filenames = append(o.FilenameOptions.Filenames, yamlFile)
 			if cmdutil.IsFilenameSliceEmpty(o.FilenameOptions.Filenames, o.FilenameOptions.Kustomize) {
 				ioStreams.ErrOut.Write([]byte("Error: must specify one of -f and -k\\n\\n"))
 			}
@@ -90,6 +99,7 @@ func NewOperatorInstallCmd(cfg *action.Configuration, f cmdutil.Factory, ioStrea
 	cmdutil.AddApplyAnnotationFlags(installCmd)
 	cmdutil.AddDryRunFlag(installCmd)
 	//cmdutil.AddFieldManagerFlagVar(installCmd,)
+	installCmd.Flags().StringVarP(&operatorVersion, "version", "v", operatorVersion, "Specify the operator version")
 	return installCmd
 }
 
