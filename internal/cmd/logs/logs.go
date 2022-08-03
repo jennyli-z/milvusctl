@@ -120,18 +120,24 @@ func NewMilvusLogsCmd(f cmdutil.Factory, streams genericclioptions.IOStreams) *c
 	o.LogsOptions.AddFlags(logsCmd)
 
 	logsCmd.Flags().StringVarP(&o.FilePath, "dir", "d", o.FilePath, "Specify the path where the logs saved")
-	logsCmd.Flags().StringVarP(&o.Namespace, "namespace", "n", o.Namespace, "use type parameter to choose install namespace")
+	// logsCmd.Flags().StringVarP(&o.Namespace, "namespace", "n", o.Namespace, "use type parameter to choose install namespace")
 	logsCmd.Flags().BoolVar(&o.SaveAll, "all", o.SaveAll, "Specify if saved all the logs of Milvus and dependences")
 	logsCmd.Flags().StringVar(&o.MilvusComponenet, "component", o.MilvusComponenet, "choose which milvus component's logs to export.")
 	logsCmd.Flags().BoolVar(&o.Etcd, "etcd", o.Etcd, "Specify if saved the logs of etcd")
 	logsCmd.Flags().BoolVar(&o.Minio, "minio", o.Minio, "Specify if saved the logs of minio")
 	logsCmd.Flags().BoolVar(&o.Pulsar, "pulsar", o.Pulsar, "Specify if saved the logs of pulsar")
-	logsCmd.Flags().BoolVar(&o.Kafka, "Kafka", o.Kafka, "Specify if saved the logs of kafka")
+	logsCmd.Flags().BoolVar(&o.Kafka, "kafka", o.Kafka, "Specify if saved the logs of kafka")
 	return logsCmd
 }
 
 func (o MilvusLogsOptions) Complete(f cmdutil.Factory, cmd *cobra.Command, args []string) error {
 	var err error
+
+	o.Namespace, _, err = f.ToRawKubeConfigLoader().Namespace()
+	if err != nil {
+		return err
+	}
+
 	o.InstanceName = args[0][7:]
 	dir := filepath.Join(o.FilePath, o.InstanceName)
 	if !Exists(o.FilePath) {

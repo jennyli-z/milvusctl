@@ -39,16 +39,19 @@ func (o *InstallOptions) RunInstall(ctx context.Context) (*release.Release, erro
 	// Find chart
 	cp, err := o.Client.ChartPathOptions.LocateChart(o.ChartName, o.Settings)
 	if err != nil {
+		fmt.Println("find cert-manager chart faild: ", err)
 		return nil, err
 	}
 
 	chart, err := loader.Load(cp)
 	if err != nil {
+		fmt.Println("load cert-manager chart faild: ", err)
 		return nil, err
 	}
 
 	// Check if chart is installable
 	if err := checkIfInstallable(chart); err != nil {
+		fmt.Println("check cert-manager chart faild: ", err)
 		return nil, err
 	}
 

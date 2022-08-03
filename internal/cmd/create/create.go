@@ -79,7 +79,7 @@ func NewMilvusCreateCmd(f cmdutil.Factory, ioStreams genericclioptions.IOStreams
 	cmdutil.AddDryRunFlag(createCmd)
 
 	createCmd.Flags().StringVarP(&o.Mode, "mode", "m", o.Mode, "use mode parameter to choose milvus standalone or cluster")
-	createCmd.Flags().StringVarP(&o.Namespace, "namespace", "n", o.Namespace, "use type parameter to choose install namespace")
+	// createCmd.Flags().StringVarP(&o.Namespace, "namespace", "n", o.Namespace, "use type parameter to choose install namespace")
 	createCmd.Flags().StringVarP(&o.Type, "type", "t", o.Type, "use type parameter to choose milvus cluster minimal,medium or large")
 	createCmd.Flags().StringArrayVar(&o.Values, "set", []string{}, "the resource requirement requests for milvus cluster")
 	// _ = createCmd.MarkFlagRequired("mode")
@@ -88,7 +88,12 @@ func NewMilvusCreateCmd(f cmdutil.Factory, ioStreams genericclioptions.IOStreams
 }
 
 func (o *MilvusCreateOptions) Complete(f cmdutil.Factory, cmd *cobra.Command) error {
-	if err := o.CreateOptions.Complete(f, cmd); err != nil {
+	var err error
+	o.Namespace, _, err = f.ToRawKubeConfigLoader().Namespace()
+	if err != nil {
+		return err
+	}
+	if err = o.CreateOptions.Complete(f, cmd); err != nil {
 		return err
 	}
 	return nil
@@ -227,12 +232,9 @@ func parsingNestedStructure(v reflect.Value, values map[string]interface{}) erro
 	}
 
 	if v.Type().String() == "v1beta1.Values" {
-		// newValues := reflect.ValueOf(values).Convert(v.FieldByName("Data").Type())
-		// fmt.Println("source value: ", v.FieldByName("Data"))
-		// fmt.Println("new value: ", values)
-		// v.FieldByName("Data").Set(newValues)
-		// err := mapOverwirte(v.FieldByName("Data"), values)
-		v.FieldByName("Data").Set(reflect.ValueOf(values).Convert(v.FieldByName("Data").Type()))
+		srcValue := v.FieldByName("Data").Interface().(map[string]interface{})
+		newMapValue := mapOverwirte(srcValue, values)
+		v.FieldByName("Data").Set(reflect.ValueOf(newMapValue).Convert(v.FieldByName("Data").Type()))
 		return err
 	}
 
@@ -315,17 +317,34 @@ func setValue(subSpec reflect.Value, value interface{}) error {
 				setValue(subSpec.Elem(), value)
 			}
 		}
+		// } else if subSpec.Kind() == reflect.Map{
+		// 	subSpec.Set(reflect.ValueOf(value).Convert(subSpec.Type()))
 	} else {
 		subSpec.Set(reflect.ValueOf(value).Convert(subSpec.Type()))
 	}
 	return err
 }
 
-// func mapOverwirte(v reflect.Value, values map[string]interface{}) error {
-// 	for key, value := range values {
-
-// 	}
-// }
+func mapOverwirte(src, values map[string]interface{}) map[string]interface{} {
+	if values == nil {
+		return src
+	}
+	for key, value := range values {
+		if sv, ok := src[key]; ok && sv != nil {
+			if istable(value) && istable(sv) {
+				mapOverwirte(sv.(map[string]interface{}), value.(map[string]interface{}))
+			} else if !istable(value) && !istable(sv) {
+				src[key] = value
+			} else {
+				fmt.Println("can't overwritter")
+				continue
+			}
+		} else {
+			src[key] = value
+		}
+	}
+	return src
+}
 
 func ifTagInSpec(t reflect.Type, key string) (string, bool) {
 	tagMap := getTagMap(t)

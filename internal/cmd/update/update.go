@@ -52,15 +52,9 @@ func NewMilvusUpdateCmd(f cmdutil.Factory, ioStreams genericclioptions.IOStreams
 		Short: "update milvus instance in kubernetes cluster",
 		Long:  "The update subcommand updates the milvus configuration",
 		Args:  cobra.MaximumNArgs(1),
-		// PreRun: func(cmd *cobra.Command, args []string) {
-		// 	if o.FileName != "" && (o.Mode != "" || o.Type != "") {
-		// 		ioStreams.ErrOut.Write([]byte("Error: -f conflict with other flag, if you want to specify filename,it can't set another flag"))
-		// 		os.Exit(1)
-		// 	}
-		// },
 
 		Run: func(cmd *cobra.Command, args []string) {
-			// cmdutil.CheckErr(o.Complete(f, cmd))
+			cmdutil.CheckErr(o.Complete(f, cmd))
 			cmdutil.CheckErr(o.validateArgs(cmd, args))
 			cmdutil.CheckErr(o.validatePruneAll(o.ApplyOptions.Prune, o.ApplyOptions.All, o.ApplyOptions.Selector))
 			cmdutil.CheckErr(o.Run(f, cmd, client, args))
@@ -77,17 +71,20 @@ func NewMilvusUpdateCmd(f cmdutil.Factory, ioStreams genericclioptions.IOStreams
 	cmdutil.AddFieldManagerFlagVar(updateCmd, &o.ApplyOptions.FieldManager, "kubectl-client-side-apply")
 
 	updateCmd.Flags().StringVarP(&o.Mode, "mode", "m", o.Mode, "use mode parameter to choose milvus standalone or cluster")
-	updateCmd.Flags().StringVarP(&o.Namespace, "namespace", "n", o.Namespace, "use type parameter to choose install namespace")
+	// updateCmd.Flags().StringVarP(&o.Namespace, "namespace", "n", o.Namespace, "use type parameter to choose install namespace")
 	updateCmd.Flags().StringVarP(&o.Type, "type", "t", o.Type, "use type parameter to choose milvus cluster minimal,medium or large")
-	// updateCmd.Flags().StringVarP(&o.FileName, "filename", "f", o.FileName, "use type parameter to choose milvus cluster minimal,medium or large")
 	updateCmd.Flags().StringArrayVar(&o.Values, "set", []string{}, "the resource requirement requests for milvus cluster")
-	// _ = updateCmd.MarkFlagRequired("mode")
 
 	return updateCmd
 }
 
 func (o *MilvusUpdateOptions) Complete(f cmdutil.Factory, cmd *cobra.Command) error {
 	var err error
+	if len(*o.ApplyOptions.DeleteFlags.FileNameFlags.Filenames) == 0 {
+		o.Namespace, _, err = f.ToRawKubeConfigLoader().Namespace()
+		return err
+	}
+
 	err = o.ApplyOptions.Complete(f, cmd)
 	if err != nil {
 		return err
@@ -96,9 +93,6 @@ func (o *MilvusUpdateOptions) Complete(f cmdutil.Factory, cmd *cobra.Command) er
 }
 
 func (o *MilvusUpdateOptions) validateArgs(cmd *cobra.Command, args []string) error {
-	// if len(args) != 0 {
-	// 	return cmdutil.UsageErrorf(cmd, "Unexpected args: %v", args)
-	// }
 	if len(o.Values) > 0 {
 		base := map[string]interface{}{}
 		for _, value := range o.Values {
@@ -123,8 +117,7 @@ func (o *MilvusUpdateOptions) validatePruneAll(prune, all bool, selector string)
 
 func (o *MilvusUpdateOptions) Run(f cmdutil.Factory, cmd *cobra.Command, client *client.Client, args []string) error {
 
-	if len(args) == 0 {
-		cmdutil.CheckErr(o.Complete(f, cmd))
+	if len(*o.ApplyOptions.DeleteFlags.FileNameFlags.Filenames) != 0 {
 		if err := o.ApplyOptions.Run(); err != nil {
 			return err
 		}
@@ -132,7 +125,7 @@ func (o *MilvusUpdateOptions) Run(f cmdutil.Factory, cmd *cobra.Command, client 
 	}
 
 	if len(args) != 1 {
-		return fmt.Errorf("accepts 1 arg(s), received %v", len(args))
+		return fmt.Errorf("accepts 1 arg(s) for instance name, received %v", len(args))
 	}
 
 	if _, err := o.updateMilvusInstance(*client, context.TODO(), args[0]); err != nil {
@@ -180,7 +173,9 @@ func parsingNestedStructure(v reflect.Value, values map[string]interface{}) erro
 	}
 
 	if v.Type().String() == "v1beta1.Values" {
-		v.FieldByName("Data").Set(reflect.ValueOf(values).Convert(v.FieldByName("Data").Type()))
+		srcValue := v.FieldByName("Data").Interface().(map[string]interface{})
+		newMapValue := mapOverwirte(srcValue, values)
+		v.FieldByName("Data").Set(reflect.ValueOf(newMapValue).Convert(v.FieldByName("Data").Type()))
 		return err
 	}
 
@@ -267,6 +262,27 @@ func setValue(subSpec reflect.Value, value interface{}) error {
 		subSpec.Set(reflect.ValueOf(value).Convert(subSpec.Type()))
 	}
 	return err
+}
+
+func mapOverwirte(src, values map[string]interface{}) map[string]interface{} {
+	if values == nil {
+		return src
+	}
+	for key, value := range values {
+		if sv, ok := src[key]; ok && sv != nil {
+			if istable(value) && istable(sv) {
+				mapOverwirte(sv.(map[string]interface{}), value.(map[string]interface{}))
+			} else if !istable(value) && !istable(sv) {
+				src[key] = value
+			} else {
+				fmt.Println("can't overwritter")
+				continue
+			}
+		} else {
+			src[key] = value
+		}
+	}
+	return src
 }
 
 func ifTagInSpec(t reflect.Type, key string) (string, bool) {

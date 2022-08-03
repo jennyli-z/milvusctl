@@ -99,7 +99,7 @@ func NewOperatorUpgradeCmd(f cmdutil.Factory, ioStreams genericclioptions.IOStre
 }
 
 func (o *OperatorUpgradeOptions) Complete(f cmdutil.Factory, cmd *cobra.Command) error {
-	fileName := fmt.Sprintf("https://github.com/milvus-io/milvus-operator/raw/v%s/deploy/manifests/deployment.yaml", o.Version)
+	fileName := fmt.Sprintf("https://raw.githubusercontent.com/milvus-io/milvus-operator/v%s/deploy/manifests/deployment.yaml", o.Version)
 	o.ApplyOptions.DeleteFlags.FileNameFlags.Filenames = &[]string{fileName}
 
 	err := o.ApplyOptions.Complete(f, cmd)

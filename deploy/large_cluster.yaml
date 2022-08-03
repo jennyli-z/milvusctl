@@ -128,7 +128,7 @@ dependencies:
               -XX:-ResizePLAB
               -XX:+ExitOnOutOfMemoryError
 components: 
-  # image: milvusdb/milvus-dev:2.1.0-20220712-cb850e55
+  image: milvusdb/milvus:v2.1.0
   # mixCoord deploys all coordinators in one 'mixture' deployment
   rootCoord:
     replicas: 1

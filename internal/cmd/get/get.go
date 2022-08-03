@@ -1,43 +1,15 @@
 package get
 
 import (
-	// "bytes"
-	// "context"
-	// "encoding/json"
 	"fmt"
-	// "io"
-	// "io/ioutil"
-	// "net/url"
-	// "os"
-	"strings"
-
 	"github.com/spf13/cobra"
-
-	// corev1 "k8s.io/api/core/v1"
-	// apierrors "k8s.io/apimachinery/pkg/api/errors"
-	// "k8s.io/apimachinery/pkg/api/meta"
-	// metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	// "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	// metav1beta1 "k8s.io/apimachinery/pkg/apis/meta/v1beta1"
-	// "k8s.io/apimachinery/pkg/runtime"
-	// utilerrors "k8s.io/apimachinery/pkg/util/errors"
-	// "k8s.io/apimachinery/pkg/util/sets"
-	// "k8s.io/apimachinery/pkg/watch"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
-	// "k8s.io/cli-runtime/pkg/printers"
-	// "k8s.io/cli-runtime/pkg/resource"
-	// kubernetesscheme "k8s.io/client-go/kubernetes/scheme"
-	// "k8s.io/client-go/rest"
-	// watchtools "k8s.io/client-go/tools/watch"
 	"k8s.io/kubectl/pkg/cmd/apiresources"
 	kubectlget "k8s.io/kubectl/pkg/cmd/get"
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
-	// "k8s.io/kubectl/pkg/rawhttp"
-	// "k8s.io/kubectl/pkg/scheme"
 	"k8s.io/kubectl/pkg/util/i18n"
-	// "k8s.io/kubectl/pkg/util/interrupt"
 	"k8s.io/kubectl/pkg/util/templates"
-	// utilpointer "k8s.io/utils/pointer"
+	"strings"
 )
 
 var (
